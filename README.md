@@ -1,70 +1,189 @@
-# Getting Started with Create React App
+   App.js
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+  import './App.css';
+  import Home from './Components/Home';
+  import AddStudent from './Components/Addstudent';
+  import Editstudent from './Components/Editstudent';
+  import { Routes, BrowserRouter, Route } from 'react-router-dom';
+  function App() {
+    return (
+      <BrowserRouter>  
+      <Routes>
+        <Route path = '/' element = {<Home/>}/>
+        <Route path = '/AddStudent' element = {<AddStudent/>}/>
+        <Route path = '/Editstudent' element = {<Home/>}/>
+        <Route path = '/Editstudent' element = {<Home/>}/>
+      </Routes>
+       </BrowserRouter>
+ 
+    );
+  }
 
-## Available Scripts
+  export default App;
 
-In the project directory, you can run:
+    Home.js
 
-### `npm start`
+  import React from 'react';
+  import { Table, Button, Alert } from 'react-bootstrap';
+  import 'bootstrap/dist/css/bootstrap.min.css';
+  import Students from './Students';
+  import{Link, useNavigate} from 'react-router-dom';
+  import AddStudent from './Addstudent';
+  function Home() {
+      let history = useNavigate();
+      const handleDelete =(id)=>{
+          let index = Students.map(function(e){
+              return e.id
+          }).indexOf(id);
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+          Students.splice(index,1);
+          history('/');
+      }
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+    return (
+      <div style={{margin:"10rem"}}>
+        <Table striped bordered hover variant="dark">
+          <thead>
+            <tr>
+              <th>id</th>
+              <th>Name</th>
+              <th>Grade</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Students && Students.length > 0 ? (
+              Students.map((item) => {
+                return (
+                  <tr key={item.id}>
+                    <td>{item.id}</td>
+                    <td>{item.name}</td>
+                    <td>{item.grade}</td>
+                    <td><Button  >Edit</Button>
+                    <Button onClick={()=> handleDelete(item.id)}>Delete</Button></td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan="3">No data</td>
+              </tr>
+            )}
+          </tbody>
+        </Table>
+        <br />
+        <Link className='d-grid gap-2' to={'/AddStudent'}>
+        <Button size='lg' >Add</Button>
+        </Link>
+      </div>
+    );
+  }
 
-### `npm test`
+  export default Home;
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+   Add
 
-### `npm run build`
+  import { Form, Button } from 'react-bootstrap';
+  import React, { useState } from 'react';
+  import 'bootstrap/dist/css/bootstrap.min.css';
+  import Students from './Students';
+  import { Link, useNavigate } from 'react-router-dom';
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+  function AddStudent() {
+    const [name, setName] = useState('');
+    const [grade, setGrade] = useState('');
+    const [id, setId] = useState('');
+    let history = useNavigate();
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+    const handleAdd = (e) => {
+      e.preventDefault();
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+      let newStudent = { id: id, name: name, grade: grade };
+      Students.push(newStudent);
+      history('/');
+    };
 
-### `npm run eject`
+    return (
+      <div style={{ margin: '10rem' }}>
+        <Form>
+          <Form.Group className="mb-3">
+            <Form.Label>ID</Form.Label>
+            <Form.Control
+              type=""
+              placeholder="Enter Id"
+              required
+              onChange={(e) => setId(e.target.value)}
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Name</Form.Label>
+            <Form.Control
+              type=""
+              placeholder="Enter Name"
+              required
+              onChange={(e) => setName(e.target.value)}
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Grade</Form.Label>
+            <Form.Control
+              type=""
+              placeholder=""
+              required
+              onChange={(e) => setGrade(e.target.value)}
+            />
+          </Form.Group>
+          <Button size="lg" onClick={handleAdd}>
+            Add
+          </Button>
+        </Form>
+      </div>
+    );
+  }
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+  export default AddStudent;
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+   api
+   
+  import React, { useState, useEffect } from 'react';
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+  const Gallery = () => {
+    const auth = '563492ad6f917000010000011b34d84b304940c1be9d2c23d74cf2e6';
+    const [galleryImages, setGalleryImages] = useState([]);
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+    useEffect(() => {
+      fetchImages();
+    }, []);
 
-## Learn More
+    const fetchImages = async () => {
+      const url = `https: api.pexels.com/v1/curated?per_page=15&page=1`;
+      const response = await fetch(url, {
+        headers: {
+          Authorization: auth,
+        },
+      });
+      const data = await response.json();
+      setGalleryImages(data.photos);
+    };
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+    return (
+      <div className="flex flex-wrap justify-center">
+      {galleryImages.map((image) => (
+        <div key={image.id} className="w-1/3 p-4">
+          <img src={image.src.large} alt={image.photographer} className="w-full h-64 object-cover" />
+          <div className="text-center">
+            <p>{image.photographer}</p>
+            <button>
+              <a href={image.src.original} target="_blank" rel="noopener noreferrer">
+                Download
+              </a>
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+  export default Gallery;
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
